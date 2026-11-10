@@ -121,30 +121,22 @@
             <label class="check"><input type="checkbox" id="fFeatured"> Feature on the home page carousel</label>
           </div>
 
-          <div class="toolbar" id="toolbar" role="toolbar" aria-label="Formatting">
-            <button type="button" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
-            <button type="button" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
-            <span class="sep"></span>
-            <button type="button" data-cmd="h2" title="Heading">H2</button>
-            <button type="button" data-cmd="h3" title="Subheading">H3</button>
-            <button type="button" data-cmd="quote" title="Quote">❝</button>
-            <button type="button" data-cmd="ul" title="Bulleted list">• List</button>
-            <button type="button" data-cmd="ol" title="Numbered list">1. List</button>
-            <button type="button" data-cmd="link" title="Link (Ctrl+K)">Link</button>
-            <button type="button" data-cmd="hr" title="Divider">―</button>
-            <span class="sep"></span>
-            <button type="button" data-cmd="undo" title="Undo">↶</button>
-            <button type="button" data-cmd="redo" title="Redo">↷</button>
-            <span class="spacer"></span>
-            <button type="button" id="previewBtn" aria-pressed="false">Preview</button>
-            <button type="button" id="speakBtn" aria-pressed="false" title="Have your browser read the text aloud">Read aloud</button>
-            <button type="button" id="focusBtn" title="Distraction-free mode (Esc to leave)">Focus</button>
+          <div class="rt-wrap" id="rtWrap">
+            <div class="toolbar rt-toolbar" id="toolbar" role="toolbar" aria-label="Formatting">
+              <span class="spacer" id="tbSpacer"></span>
+              <button type="button" id="previewBtn" aria-pressed="false" data-keep>Preview</button>
+              <button type="button" id="speakBtn" aria-pressed="false" title="Have your browser read the text aloud">Read aloud</button>
+              <button type="button" id="focusBtn" title="Distraction-free mode (Esc to leave)">Focus</button>
+            </div>
+            <div class="rt-stage" id="editorStage">
+              <div id="fBody" class="rt-editor story-text" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Story text" spellcheck="true"></div>
+              <textarea id="fSource" class="rt-source" hidden spellcheck="false" aria-label="HTML source"></textarea>
+            </div>
           </div>
-          <textarea id="fBody" placeholder="Write your story or post here..." spellcheck="true"></textarea>
           <div class="story-text preview" id="preview" hidden></div>
           <div class="editor-foot" id="editorFoot"></div>
 
-          <label class="upload">📷 Add image <input type="file" id="fImage" accept="image/*"></label>
+          <label class="upload" id="uploadLabel">📷 Add cover image <input type="file" id="fImage" accept="image/*"></label>
           <div class="media-preview" id="mediaPreview"></div>
 
           <div class="actions">
@@ -233,6 +225,7 @@
 <script src="js/app.js"></script>
 <script src="js/store.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/editor.js"></script>
 <script src="js/dashboard.js"></script>
 </body>
 </html>
