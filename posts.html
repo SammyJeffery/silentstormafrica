@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Posts | The Silent Storm</title><link rel="stylesheet" href="css/style.css"></head><body>
+<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><span>The Silent Storm</span><small>The story we tell about Africa</small></a><button class="menu-btn" id="menuBtn">☰</button><nav id="nav"><a href="index.html">Home</a><a href="articles.html">Articles</a><a class="active" href="posts.html">Posts</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="author.html">Author</a><button class="theme" id="themeBtn">☾</button></nav></div></header>
+<main><section class="page-hero"><div class="container"><span class="eyebrow">THE FEED</span><h1>Short Posts</h1><p>Quick thoughts, photographs, videos and conversations from Michael.</p></div></section>
+<section class="section container"><div class="post-grid" id="postGrid"></div></section></main>
+<footer class="footer"><div class="container footer-grid"><div><div class="brand footer-brand"><span>The Silent Storm</span><small>The story we tell about Africa</small></div><p>Thoughts, stories and conversations from Africa.</p></div><div><h4>Explore</h4><a href="articles.html">Articles</a><a href="posts.html">Posts</a><a href="about.html">About</a></div><div><h4>Connect</h4><a href="contact.html">Contact us</a><a href="#">Instagram</a><a href="#">Facebook</a></div></div><div class="copyright">© 2026 The Silent Storm · By Michael Asubiojo</div></footer>
+<script src="js/app.js"></script>
+<script src="js/store.js"></script>
+<script src="js/reactions.js"></script>
+<script>
+Store.onReady(() => {
+  const grid = document.getElementById('postGrid');
+
+  function mediaHTML(p) {
+    if (!p.media) return '';
+    if (p.mediaType === 'video') {
+      return `<div class="video-placeholder" onclick="playDemo(this)">▶<span>Watch post</span></div>`;
+    }
+    return `<img src="${p.media}">`;
+  }
+
+  function render() {
+    const posts = Store.getPosts();
+    grid.innerHTML = posts.length ? posts.map(p => `
+      <article class="post-card" data-id="${p.id}">
+        ${mediaHTML(p)}
+        <div class="post-top"><div class="avatar">MA</div><div><b>Michael Asubiojo</b><small>${Store.niceDate(p.date)}</small></div></div>
+        <p>${escapeHTML(p.text)}</p>
+        <div class="reactions">
+          <div class="react-slot"></div>
+          <button class="btn-comment">💬 ${(p.comments || []).length}</button>
+        </div>
+        <div class="comments" hidden>
+          ${(p.comments || []).map(c => `<div class="comment"><b>${escapeHTML(c.name)}</b> — ${escapeHTML(c.text)}</div>`).join('')}
+          <input placeholder="Write a comment..." class="comment-input">
+        </div>
+      </article>
+    `).join('') : `<p style="color:var(--muted)">No posts published yet. Check back soon.</p>`;
+
+    grid.querySelectorAll('.post-card').forEach(card => {
+      const id = card.dataset.id;
+      Reactions.mount(card.querySelector('.react-slot'), { kind: 'post', id });
+      Store.trackView('post', id);
+      card.querySelector('.btn-comment').addEventListener('click', () => {
+        const box = card.querySelector('.comments');
+        box.hidden = !box.hidden;
+      });
+      const input = card.querySelector('.comment-input');
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && input.value.trim()) {
+          Store.addPostComment(id, { name: 'You', text: input.value.trim(), date: new Date().toISOString() });
+          const d = document.createElement('div');
+          d.className = 'comment';
+          d.innerHTML = `<b>You</b> — ${escapeHTML(input.value.trim())}`;
+          input.parentElement.insertBefore(d, input);
+          input.value = '';
+          card.querySelector('.btn-comment').textContent = `💬 ${Store.getPost(id).comments.length}`;
+        }
+      });
+    });
+  }
+
+  render();
+});
+</script>
+</body></html>

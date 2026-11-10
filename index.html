@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Silent Storm | The Story We Tell About Africa</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html"><span>The Silent Storm</span><small>The story we tell about Africa</small></a>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <nav id="nav">
+      <a class="active" href="index.html">Home</a><a href="articles.html">Articles</a><a href="posts.html">Posts</a>
+      <a href="about.html">About</a><a href="contact.html">Contact</a><a href="author.html">Author</a>
+      <button class="theme" id="themeBtn">☾</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero" aria-label="Welcome">
+  <div class="hero-slides" id="heroSlides"></div>
+  <div class="container hero-inner">
+    <p class="eyebrow">BY MICHAEL ASUBIOJO</p>
+    <h1>The stories Africa<br><em>doesn't stop telling.</em></h1>
+    <p class="hero-copy">A thoughtful space for African stories, ideas, culture, people and the quiet forces shaping our continent.</p>
+    <a class="btn" href="articles.html">Explore the stories →</a>
+  </div>
+  <div class="hero-foot"><div class="container">
+    <p class="hero-caption" id="heroCaption" aria-live="off"></p>
+    <div class="hero-dots" id="heroDots" role="group" aria-label="Choose a background picture"></div>
+  </div></div>
+</section>
+
+<section class="section container">
+  <div class="section-head"><div><span class="eyebrow">FEATURED</span><h2>Stories worth sitting with.</h2></div><a href="articles.html">View all articles →</a></div>
+  <div class="carousel">
+    <button class="slide-btn prev" onclick="moveSlide(-1, homeSlideCount)">‹</button>
+    <div class="slides" id="slides"></div>
+    <button class="slide-btn next" onclick="moveSlide(1, homeSlideCount)">›</button>
+  </div>
+</section>
+
+<section class="section alt"><div class="container">
+  <div class="section-head"><div><span class="eyebrow">FROM THE FEED</span><h2>Short thoughts. Real conversations.</h2></div><a href="posts.html">See all posts →</a></div>
+  <div class="post-grid" id="homeFeed"></div>
+</div></section>
+
+<section class="quote-section"><div class="container quote"><span>“</span><blockquote>Africa is not a single story. It is a thousand conversations happening at once.</blockquote><p>— The Silent Storm</p></div></section>
+</main>
+
+<footer class="footer"><div class="container footer-grid"><div><div class="brand footer-brand"><span>The Silent Storm</span><small>The story we tell about Africa</small></div><p>Thoughts, stories and conversations from Africa and about Africa.</p></div><div><h4>Explore</h4><a href="articles.html">Articles</a><a href="posts.html">Posts</a><a href="about.html">About</a></div><div><h4>Connect</h4><a href="contact.html">Contact us</a><a href="#">Instagram</a><a href="#">Facebook</a><a href="#">YouTube</a></div></div><div class="copyright">© 2026 The Silent Storm · By Michael Asubiojo</div></footer>
+<script src="js/app.js"></script>
+<script src="js/store.js"></script>
+<script src="js/reactions.js"></script>
+<script src="js/hero.js"></script>
+<script>
+let homeSlideCount = 1;
+Store.onReady(() => {
+  const articles = Store.getArticles();
+  const featured = (articles.filter(a => a.featured).length ? articles.filter(a => a.featured) : articles).slice(0, 5);
+  homeSlideCount = Math.max(featured.length, 1);
+
+  document.getElementById('slides').innerHTML = featured.length ? featured.map(a => `
+    <article class="feature-card">
+      <div class="feature-img ${a.cover ? '' : (a.thumbClass || 'img1')}" ${a.cover ? `style="background:url('${a.cover}') center/cover"` : ''}></div>
+      <div class="feature-body">
+        <span class="tag">${escapeHTML(a.tag)}</span>
+        <h3>${escapeHTML(a.title)}</h3>
+        <p>${escapeHTML(a.excerpt)}</p>
+        <a href="article.html?id=${a.id}">Read the full story →</a>
+      </div>
+    </article>
+  `).join('') : `<article class="feature-card"><div class="feature-body"><h3>No articles yet</h3><p>Publish your first story from the author dashboard.</p></div></article>`;
+
+  const posts = Store.getPosts().slice(0, 3);
+  document.getElementById('homeFeed').innerHTML = posts.length ? posts.map(p => `
+    <article class="post-card">
+      ${p.media && p.mediaType === 'image' ? `<img src="${p.media}">` : ''}
+      ${p.mediaType === 'video' ? `<div class="video-placeholder" onclick="playDemo(this)">▶<span>Watch post</span></div>` : ''}
+      <div class="post-top"><div class="avatar">MA</div><div><b>Michael Asubiojo</b><small>${Store.niceDate(p.date)}</small></div></div>
+      <p>${escapeHTML(p.text)}</p>
+      <div class="reactions ro">${Reactions.summaryHTML(p.reactions)}<span>💬 ${(p.comments || []).length}</span></div>
+    </article>
+  `).join('') : `<p style="color:var(--muted)">No posts yet.</p>`;
+});
+</script>
+</body></html>

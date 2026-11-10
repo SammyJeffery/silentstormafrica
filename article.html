@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Article | The Silent Storm</title><link rel="stylesheet" href="css/style.css"></head><body>
+<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><span>The Silent Storm</span><small>The story we tell about Africa</small></a><button class="menu-btn" id="menuBtn">☰</button><nav id="nav"><a href="index.html">Home</a><a class="active" href="articles.html">Articles</a><a href="posts.html">Posts</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="author.html">Author</a><button class="theme" id="themeBtn">☾</button></nav></div></header>
+<main id="articleRoot"></main>
+<footer class="footer"><div class="container footer-grid"><div><div class="brand footer-brand"><span>The Silent Storm</span><small>The story we tell about Africa</small></div><p>Thoughts, stories and conversations from Africa.</p></div><div><h4>Explore</h4><a href="articles.html">Articles</a><a href="posts.html">Posts</a><a href="about.html">About</a></div><div><h4>Connect</h4><a href="contact.html">Contact us</a><a href="#">Instagram</a><a href="#">Facebook</a></div></div><div class="copyright">© 2026 The Silent Storm · By Michael Asubiojo</div></footer>
+<script src="js/app.js"></script>
+<script src="js/store.js"></script>
+<script src="js/reactions.js"></script>
+<script>
+Store.onReady(() => {
+  const id = new URLSearchParams(location.search).get('id');
+  const a = Store.getArticle(id) || Store.getArticles()[0];
+  const root = document.getElementById('articleRoot');
+  if (!a) {
+    root.innerHTML = `<div class="container" style="padding:80px 0;"><h1>No articles yet</h1><p>Check back soon, or visit the <a href="articles.html">archive</a>.</p></div>`;
+    return;
+  }
+  document.title = a.title + ' | The Silent Storm';
+  const paragraphs = renderRichText(a.body);
+  Store.trackView('article', a.id);
+  const cover = a.cover
+    ? `<div class="story-image" style="background:url('${a.cover}') center/cover"></div>`
+    : `<div class="story-image ${a.thumbClass || 'img1'}"></div>`;
+
+  root.innerHTML = `
+    <article class="story container">
+      <span class="tag">${escapeHTML((a.tag || '').toUpperCase())}</span>
+      <h1>${escapeHTML(a.title)}</h1>
+      <p class="lead">${escapeHTML(a.excerpt)}</p>
+      <div class="story-meta">By Michael Asubiojo · ${Store.niceDate(a.date)} · ${Store.readTime(a.body)}</div>
+      ${cover}
+      <div class="story-text">${paragraphs}</div>
+      <div class="reactions" style="max-width:740px;margin:0 auto;"><div id="reactMount"></div></div>
+      <section class="comment-box">
+        <h2>Join the conversation</h2>
+        <input id="commentName" placeholder="Your name">
+        <textarea id="commentText" placeholder="Share your thoughts..."></textarea>
+        <button class="btn" id="postCommentBtn">Post comment</button>
+        <div id="commentList"></div>
+      </section>
+    </article>
+  `;
+
+  function renderComments() {
+    const list = document.getElementById('commentList');
+    const comments = a.comments || [];
+    list.innerHTML = comments.length
+      ? comments.map(c => `<div class="comment"><b>${escapeHTML(c.name)}</b> — ${escapeHTML(c.text)}</div>`).join('')
+      : '';
+  }
+  renderComments();
+
+  Reactions.mount(document.getElementById('reactMount'), { kind: 'article', id: a.id });
+  document.getElementById('postCommentBtn').addEventListener('click', () => {
+    const name = document.getElementById('commentName').value.trim() || 'Anonymous';
+    const text = document.getElementById('commentText').value.trim();
+    if (!text) return;
+    Store.addArticleComment(a.id, { name, text, date: new Date().toISOString() });
+    a.comments = Store.getArticle(a.id).comments;
+    document.getElementById('commentText').value = '';
+    document.getElementById('commentName').value = '';
+    renderComments();
+  });
+});
+</script>
+</body></html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Author Studio | The Silent Storm</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/author.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html"><span>The Silent Storm</span><small>The story we tell about Africa</small></a>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <nav id="nav">
+      <a href="index.html">Home</a><a href="articles.html">Articles</a><a href="posts.html">Posts</a>
+      <a href="about.html">About</a><a href="contact.html">Contact</a><a class="active" href="author.html">Author</a>
+      <button class="theme" id="themeBtn" aria-label="Toggle theme">☾</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="author-wrap container">
+  <div class="dashboard" id="dashboard">
+    <div class="dashboard-head">
+      <div>
+        <span class="eyebrow">AUTHOR STUDIO</span>
+        <h1>Dashboard</h1>
+        <p class="who-line" id="whoLine"></p>
+      </div>
+      <div class="head-actions">
+        <button type="button" class="btn" id="newBtn">+ New story</button>
+        <button type="button" onclick="handleLogout()" class="btn ghost">Log out</button>
+      </div>
+    </div>
+
+    <div class="dash-tabs" role="tablist" aria-label="Dashboard sections">
+      <button role="tab" class="dash-tab" data-tab="overview">Overview</button>
+      <button role="tab" class="dash-tab" data-tab="write">Write</button>
+      <button role="tab" class="dash-tab" data-tab="content">Content <span class="count" id="contentCount"></span></button>
+      <button role="tab" class="dash-tab" data-tab="comments">Comments <span class="count" id="commentCount"></span></button>
+    </div>
+
+    <div class="notice" id="demoBanner" hidden>
+      <span>You're looking at <b>sample traffic</b> so the charts aren't empty on a new install. Real visits from this browser are added on top of it.</span>
+      <button type="button" class="link-btn" id="clearDemo">Clear sample data</button>
+    </div>
+
+    <!-- ============ OVERVIEW ============ -->
+    <section class="dash-panel" id="panel-overview" role="tabpanel">
+      <div class="panel-bar">
+        <h2>Site performance</h2>
+        <div class="seg" id="rangeSeg" role="group" aria-label="Date range">
+          <button type="button" data-range="7">7 days</button>
+          <button type="button" data-range="30" class="on">30 days</button>
+          <button type="button" data-range="90">90 days</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="kpis"></div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Traffic</h3>
+          <div class="legend"><span><i class="sw sw-views"></i>Page views</span><span><i class="sw sw-visits"></i>Visits</span></div>
+        </div>
+        <div id="viewsChart" class="chart"></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head">
+            <h3>Top content</h3>
+            <div class="seg small" id="sortSeg" role="group" aria-label="Sort by">
+              <button type="button" data-sort="views" class="on">Views</button>
+              <button type="button" data-sort="reactions">Reactions</button>
+              <button type="button" data-sort="comments">Comments</button>
+            </div>
+          </div>
+          <div id="topContent"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>How readers react</h3></div>
+          <div id="reactionBars"></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h3>Publishing rhythm</h3><span class="muted-sm">Last 12 weeks</span></div>
+          <div id="rhythm"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Recent activity</h3></div>
+          <ul class="feed" id="activityFeed"></ul>
+        </div>
+      </div>
+      <p class="fine">Stats are kept in this browser's storage, like the rest of the prototype. Connect the site to a real backend to count visitors from every device.</p>
+    </section>
+
+    <!-- ============ WRITE ============ -->
+    <section class="dash-panel" id="panel-write" role="tabpanel" hidden>
+      <div class="write-grid">
+        <form id="contentForm" class="editor">
+          <div class="editor-head">
+            <h2 id="formTitle">Create content</h2>
+            <span class="save-state" id="saveState" aria-live="polite"></span>
+          </div>
+          <div class="kind-switch">
+            <button type="button" class="kind-btn active" data-kind="article">Article</button>
+            <button type="button" class="kind-btn" data-kind="post">Short post</button>
+          </div>
+
+          <div id="articleFields">
+            <input id="fTitle" placeholder="Headline / title" autocomplete="off">
+            <div class="meter" id="titleMeter"></div>
+            <input id="fTag" placeholder="Category tag (e.g. Culture)" autocomplete="off">
+            <textarea id="fExcerpt" placeholder="One-line summary / dek" style="min-height:70px"></textarea>
+            <div class="meter" id="excerptMeter"></div>
+            <label class="check"><input type="checkbox" id="fFeatured"> Feature on the home page carousel</label>
+          </div>
+
+          <div class="toolbar" id="toolbar" role="toolbar" aria-label="Formatting">
+            <button type="button" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+            <span class="sep"></span>
+            <button type="button" data-cmd="h2" title="Heading">H2</button>
+            <button type="button" data-cmd="h3" title="Subheading">H3</button>
+            <button type="button" data-cmd="quote" title="Quote">❝</button>
+            <button type="button" data-cmd="ul" title="Bulleted list">• List</button>
+            <button type="button" data-cmd="ol" title="Numbered list">1. List</button>
+            <button type="button" data-cmd="link" title="Link (Ctrl+K)">Link</button>
+            <button type="button" data-cmd="hr" title="Divider">―</button>
+            <span class="sep"></span>
+            <button type="button" data-cmd="undo" title="Undo">↶</button>
+            <button type="button" data-cmd="redo" title="Redo">↷</button>
+            <span class="spacer"></span>
+            <button type="button" id="previewBtn" aria-pressed="false">Preview</button>
+            <button type="button" id="speakBtn" aria-pressed="false" title="Have your browser read the text aloud">Read aloud</button>
+            <button type="button" id="focusBtn" title="Distraction-free mode (Esc to leave)">Focus</button>
+          </div>
+          <textarea id="fBody" placeholder="Write your story or post here..." spellcheck="true"></textarea>
+          <div class="story-text preview" id="preview" hidden></div>
+          <div class="editor-foot" id="editorFoot"></div>
+
+          <label class="upload">📷 Add image <input type="file" id="fImage" accept="image/*"></label>
+          <div class="media-preview" id="mediaPreview"></div>
+
+          <div class="actions">
+            <button class="btn" type="submit" id="submitBtn">Publish</button>
+            <button class="btn ghost" type="button" id="cancelEditBtn" hidden>Cancel edit</button>
+            <button class="btn ghost" type="button" id="discardDraftBtn">Clear form</button>
+          </div>
+          <p id="publishMsg" class="form-msg" aria-live="polite"></p>
+        </form>
+
+        <aside class="tools" aria-label="Writing tools">
+          <div class="card tool">
+            <h3>Today's goal</h3>
+            <div class="goal-row"><input type="number" id="goalInput" min="50" step="50" aria-label="Word goal"><span>words</span></div>
+            <div class="bar"><i id="goalBar"></i></div>
+            <p class="muted-sm" id="goalText"></p>
+          </div>
+
+          <div class="card tool">
+            <h3>Writing insights</h3>
+            <dl class="stat-list" id="insights"></dl>
+            <ul class="tips" id="tips"></ul>
+          </div>
+
+          <div class="card tool">
+            <h3>Writing sprint</h3>
+            <div class="sprint">
+              <select id="sprintLen" aria-label="Sprint length"><option value="10">10 min</option><option value="15" selected>15 min</option><option value="25">25 min</option></select>
+              <button type="button" class="btn small" id="sprintBtn">Start</button>
+              <b id="sprintClock">15:00</b>
+            </div>
+            <p class="muted-sm" id="sprintInfo">Set a timer and see how many words you add.</p>
+          </div>
+
+          <div class="card tool">
+            <h3>Find &amp; replace</h3>
+            <input id="fFind" placeholder="Find" aria-label="Find">
+            <input id="fRepl" placeholder="Replace with" aria-label="Replace with">
+            <div class="row-btns">
+              <button type="button" class="btn small ghost" id="findNext">Find next</button>
+              <button type="button" class="btn small ghost" id="replaceOne">Replace</button>
+              <button type="button" class="btn small ghost" id="replaceAll">Replace all</button>
+            </div>
+            <p class="muted-sm" id="findInfo"></p>
+          </div>
+
+          <div class="card tool">
+            <h3>Need an idea?</h3>
+            <p class="prompt" id="promptText"></p>
+            <div class="row-btns">
+              <button type="button" class="btn small ghost" id="promptNext">Another</button>
+              <button type="button" class="btn small ghost" id="promptUse">Use it</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ CONTENT ============ -->
+    <section class="dash-panel" id="panel-content" role="tabpanel" hidden>
+      <div class="two-col even">
+        <div class="manage card"><h2>Your articles</h2><div id="articleList"></div></div>
+        <div class="manage card"><h2>Your posts</h2><div id="postList"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ COMMENTS ============ -->
+    <section class="dash-panel" id="panel-comments" role="tabpanel" hidden>
+      <div class="card"><div class="card-head"><h2>All comments</h2></div><div id="commentsList"></div></div>
+    </section>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div><div class="brand footer-brand"><span>The Silent Storm</span><small>The story we tell about Africa</small></div><p>Private author publishing studio.</p></div>
+    <div><h4>Explore</h4><a href="articles.html">Articles</a><a href="posts.html">Posts</a><a href="about.html">About</a></div>
+    <div><h4>Connect</h4><a href="contact.html">Contact us</a><a href="#">Instagram</a></div>
+  </div>
+  <div class="copyright">© 2026 The Silent Storm · By Michael Asubiojo</div>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>
