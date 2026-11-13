@@ -1,16 +1,17 @@
 /* ---------------------------------------------------------------
-   Store — the site's data layer. Articles, posts, reactions and
-   comments live in Netlify Database (served by /api). This file
-   keeps a localStorage copy so reads stay synchronous: Store.sync()
-   refreshes it from the server on every page load, and every write
-   updates the copy immediately and is then sent to the API.
-   Page code should render inside Store.onReady(fn).
-   Traffic stats, drafts and goals are still kept per-browser.
+   Store — the site's data layer. Everything (articles, posts,
+   reactions, comments) lives in the browser's localStorage under
+   keys prefixed "ss:". No server: this is a frontend prototype.
+
+   To move to a real backend later, swap the guts of these
+   functions for calls to your API — the pages that use Store
+   don't need to change.
    --------------------------------------------------------------- */
 const Store = (() => {
   const KEYS = {
     articles: 'ss:articles',
     posts: 'ss:posts',
+    seeded: 'ss:seeded',
     views: 'ss:views',
     activity: 'ss:activity',
     mine: 'ss:myreactions',
@@ -44,7 +45,12 @@ const Store = (() => {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
   function wordCount(str) {
-    return (str || '').trim().split(/\s+/).filter(Boolean).length;
+    let s = str || '';
+    // Formatted (HTML) bodies start with a marker: count the words, not the tags.
+    if (s.indexOf('<!--rte-->') === 0) {
+      s = s.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]*>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ');
+    }
+    return s.trim().split(/\s+/).filter(Boolean).length;
   }
   function readTime(str) {
     return Math.max(1, Math.round(wordCount(str) / 200)) + ' min read';
@@ -70,6 +76,90 @@ const Store = (() => {
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+  }
+
+  function seedIfEmpty() {
+    if (read(KEYS.seeded, false)) return;
+
+    const articles = [
+      {
+        id: uid(),
+        title: 'Beyond the Headlines: Reimagining the African Story',
+        tag: 'Culture',
+        excerpt: 'What changes when Africans become the primary narrators of their own complex, beautiful story?',
+        body: `For generations, the African story has often arrived through a narrow frame. Headlines can reduce enormous places and diverse people to crisis, conflict or scarcity. But a continent cannot be contained by a headline.\n\nThe Silent Storm exists to make room for the quieter truths: the entrepreneur opening a shop before sunrise, the student learning something new, the artist preserving memory through sound, and the communities building futures with what they have.\n\nA story is more than an event. Stories shape how we see ourselves and how others see us. Reclaiming the narrative does not mean pretending that difficult realities do not exist. It means refusing to let difficulty become the only lens.\n\nA fuller African story can hold contradiction: struggle and joy, innovation and inequality, tradition and reinvention. It can ask hard questions while still celebrating the people who live the answers every day.\n\nThat is the invitation behind this blog. Read, question, disagree, contribute and keep the conversation moving.`,
+        cover: '',
+        thumbClass: 'img1',
+        featured: true,
+        date: new Date(Date.now() - 86400000 * 2).toISOString(),
+        reactions: { love: 31, like: 24 },
+        comments: [
+          { name: 'Ada', text: 'This is beautifully said.', date: new Date(Date.now() - 86000000).toISOString() }
+        ]
+      },
+      {
+        id: uid(),
+        title: 'The Quiet Power of Ordinary African People',
+        tag: 'Society',
+        excerpt: 'Progress is often built by people whose names never make the headlines.',
+        body: `Progress rarely announces itself. It shows up as a mother saving small amounts every week so her children can stay in school, a mechanic training three apprentices for free, a market association settling disputes without ever calling it "governance."\n\nWe built this piece around a simple idea: that the ordinary decisions of ordinary people are not a footnote to the African story — they are most of it.\n\nThe people in this piece will never appear in a headline. That was always the point.`,
+        cover: '',
+        thumbClass: 'img2',
+        featured: true,
+        date: new Date(Date.now() - 86400000 * 5).toISOString(),
+        reactions: { love: 18, like: 40 },
+        comments: []
+      },
+      {
+        id: uid(),
+        title: 'What Does a New African Future Look Like?',
+        tag: 'Ideas',
+        excerpt: 'Young minds are challenging old assumptions and building something different.',
+        body: `Every conversation we had for this piece started the same way: someone insisting the future had to be designed, not inherited.\n\nAcross the cities we visited, a generation raised on both hardship and possibility is building things their parents didn't have language for — cooperative housing models, hyperlocal logistics networks, community-owned solar grids.\n\nNone of it is utopian. All of it is a bet that the next chapter doesn't have to look like the last one.`,
+        cover: '',
+        thumbClass: 'img3',
+        featured: true,
+        date: new Date(Date.now() - 86400000 * 9).toISOString(),
+        reactions: { love: 22, like: 61 },
+        comments: []
+      }
+    ];
+
+    const posts = [
+      {
+        id: uid(),
+        text: 'Sometimes the most powerful African stories are not dramatic. They are the everyday choices people make to keep moving forward.',
+        media: '',
+        mediaType: '',
+        date: new Date(Date.now() - 3600000 * 2).toISOString(),
+        reactions: { love: 12, like: 9 },
+        comments: [
+          { name: 'Ada', text: 'This is beautifully said.', date: new Date(Date.now() - 3000000).toISOString() }
+        ]
+      },
+      {
+        id: uid(),
+        text: 'There is beauty in the details. In our markets, streets, music, food and conversations.',
+        media: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=80',
+        mediaType: 'image',
+        date: new Date(Date.now() - 86400000).toISOString(),
+        reactions: { love: 20, like: 15 },
+        comments: []
+      },
+      {
+        id: uid(),
+        text: 'A short visual note from the road: listening before speaking.',
+        media: '',
+        mediaType: 'video',
+        date: new Date(Date.now() - 86400000 * 3).toISOString(),
+        reactions: { love: 25, like: 18 },
+        comments: []
+      }
+    ];
+
+    write(KEYS.articles, articles);
+    write(KEYS.posts, posts);
+    write(KEYS.seeded, true);
   }
 
   // Sample traffic so the dashboard has something to show on a brand-new install.
@@ -109,46 +199,8 @@ const Store = (() => {
     write(KEYS.activity, list.slice(0, 200));
   }
 
-  function api(method, path, body) {
-    return fetch('/api/' + path, {
-      method,
-      headers: body ? { 'Content-Type': 'application/json' } : {},
-      body: body ? JSON.stringify(body) : undefined,
-      credentials: 'same-origin'
-    }).then(res => {
-      if (res.status === 401 && /author\.html/.test(location.pathname)) location.href = 'login.html';
-      if (!res.ok) throw new Error('API ' + method + ' ' + path + ' failed: ' + res.status);
-      return res.json();
-    }).catch(err => { console.error(err); alert('Could not save to the server. Please check your connection and try again.'); throw err; });
-  }
-  function patchLocal(kind, id, patch) {
-    const key = kind === 'article' ? KEYS.articles : KEYS.posts;
-    const list = read(key, []);
-    const idx = list.findIndex(x => x.id === id);
-    if (idx === -1) return null;
-    list[idx] = Object.assign({}, list[idx], patch);
-    write(key, list);
-    return list[idx];
-  }
-
-  let ready;
-
   return {
-    init() {
-      ready = this.sync().then(() => { ensureDemoStats(); this.trackVisit(); });
-    },
-    // Pull the latest content from the database into the local copy.
-    sync() {
-      return fetch('/api/content', { credentials: 'same-origin' })
-        .then(res => { if (!res.ok) throw new Error('content ' + res.status); return res.json(); })
-        .then(data => { write(KEYS.articles, data.articles); write(KEYS.posts, data.posts); })
-        .catch(err => console.error('Could not load content from the server; showing the last saved copy.', err));
-    },
-    // Runs fn once the DOM is ready and content has been loaded from the server.
-    onReady(fn) {
-      const dom = new Promise(r => document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r) : r());
-      Promise.all([dom, ready]).then(fn);
-    },
+    init() { seedIfEmpty(); ensureDemoStats(); this.trackVisit(); },
     uid, readTime, wordCount, dayKey, daysAgo, sumReactions, REACTIONS,
 
     niceDate(iso) {
@@ -176,19 +228,26 @@ const Store = (() => {
       }, article);
       list.unshift(record);
       this.saveArticles(list);
-      api('PUT', 'articles/' + record.id, record);
       return record;
     },
     updateArticle(id, patch) {
-      const rec = patchLocal('article', id, patch);
-      if (rec) api('PUT', 'articles/' + id, rec);
-      return rec;
+      const list = this.getArticles();
+      const idx = list.findIndex(a => a.id === id);
+      if (idx === -1) return null;
+      list[idx] = Object.assign({}, list[idx], patch);
+      this.saveArticles(list);
+      return list[idx];
     },
     deleteArticle(id) {
       this.saveArticles(this.getArticles().filter(a => a.id !== id));
-      api('DELETE', 'articles/' + id);
     },
-    addArticleComment(id, comment) { this.addComment('article', id, comment); },
+    addArticleComment(id, comment) {
+      const a = this.getArticle(id);
+      if (!a) return;
+      a.comments = a.comments || [];
+      a.comments.push(comment);
+      this.updateArticle(id, { comments: a.comments });
+    },
     reactArticle(id, key) { return this.react('article', id, key).reactions; },
 
     // ---- Posts ----
@@ -205,31 +264,25 @@ const Store = (() => {
       }, post);
       list.unshift(record);
       this.savePosts(list);
-      api('PUT', 'posts/' + record.id, record);
       return record;
     },
     updatePost(id, patch) {
-      const rec = patchLocal('post', id, patch);
-      if (rec) api('PUT', 'posts/' + id, rec);
-      return rec;
+      const list = this.getPosts();
+      const idx = list.findIndex(p => p.id === id);
+      if (idx === -1) return null;
+      list[idx] = Object.assign({}, list[idx], patch);
+      this.savePosts(list);
+      return list[idx];
     },
     deletePost(id) {
       this.savePosts(this.getPosts().filter(p => p.id !== id));
-      api('DELETE', 'posts/' + id);
     },
-    addPostComment(id, comment) { this.addComment('post', id, comment); },
-
-    // ---- Comments ----
-    addComment(kind, id, comment) {
-      const item = kind === 'article' ? this.getArticle(id) : this.getPost(id);
-      if (!item) return;
-      const comments = (item.comments || []).concat([comment]);
-      patchLocal(kind, id, { comments });
-      api('POST', 'comments', { kind, itemId: id, name: comment.name, text: comment.text }).then(row => {
-        const cur = kind === 'article' ? this.getArticle(id) : this.getPost(id);
-        if (!cur) return;
-        patchLocal(kind, id, { comments: cur.comments.map(c => (c === comment || (!c.id && c.text === comment.text && c.date === comment.date)) ? Object.assign({}, c, { id: row.id }) : c) });
-      });
+    addPostComment(id, comment) {
+      const p = this.getPost(id);
+      if (!p) return;
+      p.comments = p.comments || [];
+      p.comments.push(comment);
+      this.updatePost(id, { comments: p.comments });
     },
     reactPost(id, key) { return this.react('post', id, key).reactions; },
 
@@ -248,8 +301,7 @@ const Store = (() => {
       if (prev === key) { mine = null; delete mineMap[mk]; }
       else { r[key] = (r[key] || 0) + 1; mineMap[mk] = key; }
       write(KEYS.mine, mineMap);
-      patchLocal(kind, id, { reactions: r });
-      api('POST', 'react', { kind, id, add: mine, remove: prev });
+      if (kind === 'article') this.updateArticle(id, { reactions: r }); else this.updatePost(id, { reactions: r });
       if (mine) logActivity({ type: 'reaction', kind, itemId: id, key, title: kind === 'article' ? item.title : (item.text || '').slice(0, 60) });
       return { reactions: r, mine };
     },
@@ -349,9 +401,8 @@ const Store = (() => {
     deleteComment(kind, id, index) {
       const item = kind === 'article' ? this.getArticle(id) : this.getPost(id);
       if (!item || !item.comments) return;
-      const target = item.comments[index];
-      patchLocal(kind, id, { comments: item.comments.filter((_, i) => i !== index) });
-      if (target && target.id) api('DELETE', 'comments/' + target.id);
+      const comments = item.comments.filter((_, i) => i !== index);
+      if (kind === 'article') this.updateArticle(id, { comments }); else this.updatePost(id, { comments });
     },
 
     // ---- Writing studio helpers ----
